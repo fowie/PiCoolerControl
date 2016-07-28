@@ -16,7 +16,10 @@ from datetime import datetime, date, time, timedelta
 import pytz
 from tzlocal import get_localzone
 localtz = get_localzone()
-
+import subprocess
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 import MySQL
 
 # Data object defines
@@ -26,11 +29,11 @@ defaultPresoakTime = timedelta(minutes=5)
 presoakDelayTime = timedelta(minutes=30)
 lastPresoakTimeFilename = "presoak.pickle"
 
-GPIOon = "0";
-GPIOoff = "1";
+GPIOon = False;
+GPIOoff = True;
 GPIOwrite = "gpio -g write ";
 GPIOread = "gpio -g read ";
-PINS = {"Pump" : "2", "High" : "3", "Low" : "4"};
+PINS = {"Pump" : 2, "High" : 3, "Low" : 4};
 
 MySql = MySQL.MySql()
 schedule = MySql.GetSchedules()
@@ -60,6 +63,8 @@ except IOError:
 	state = pickle.load(open(stateMachinePickleFilename, 'rb'))
 except:
 	print("Error:", sys.exc_info()[0])
+print "State:"
+print state
 
 try:
 	print "Unpickling last presoak time"
@@ -69,12 +74,20 @@ except IOError:
 	lastPresoak = datetime.now(localtz) - timedelta(hours=1)
 	pickle.dump(lastPresoak, open(lastPresoakTimeFilename, 'wb'))
 	lastPresoak = pickle.load(open(lastPresoakTimeFilename, 'rb'))
+print "Last Presoak"
+print lastPresoak
+
+for key,value in PINS.items():
+	print("GPIO.setup("+str(value)+", GPIO.OUT)")
+	GPIO.setup(value, GPIO.OUT)
 
 def GpioSet(pin, newVal):
-	global GPIOwrite, GPIOon, GPIOoff, PINS;
-	command = GPIOwrite+" "+PINS[pin]+" "+newVal;
-	print("Command: "+command);
-	#sys.exec(command);
+	#global GPIOwrite, GPIOon, GPIOoff, PINS;
+	#command = ["/usr/bin/"+GPIOwrite, pin, newVal];
+	#print("Command: ")
+	#print(command);
+	#subprocess.call(command)
+	GPIO.output(pin, newVal)	
 
 # Sate functions
 def IdleState():
@@ -122,12 +135,13 @@ def ErrorState():
 
 #turn on the pump, keep fan off
 def PresoakState():
-	global PINS, GPIOon, GPIOoff
+	global PINS, GPIOon, GPIOoff, lastPresoak, localtz
 	print "Pre-Soak State"
 	GpioSet(PINS["Pump"], GPIOon)
 	GpioSet(PINS["High"], GPIOoff)
 	GpioSet(PINS["Low"], GPIOoff)
-
+	lastPresoak = datetime.now(localtz)
+	
 def HighState():
 	global PINS, GPIOon, GPIOoff
 	print "High fan state"
@@ -159,8 +173,13 @@ now = localtz.localize(datetime.now(localtz).time())
 print now
 print state["Current State End Time"]
 if state["Current State End Time"] < now:
-	print "Moving to next state"
+	print "Moving to next state: "+state["Next State"]
 	state["Current State"] = state["Next State"]
+	state["Current State End Time"] = localtz.localize((datetime.now(localtz) + state["Next State Duration"]).time())
+	state["Next State"] = "IDLE"
+else:
+	print "Staying in state "+state["Current State"]
+	print "Next state change is at "+str(state["Current State End Time"])
 
 # Update State #
 pickle.dump(state, open(stateMachinePickleFilename, 'wb'))
