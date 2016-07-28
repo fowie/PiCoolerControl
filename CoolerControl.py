@@ -102,13 +102,13 @@ def IdleState():
 					print "Presoaking"
 					state["Current State"] = "PRESOAK"
 					state["Next State"] = sch["State"]
-					state["Current State End Time"] = now + defaultPresoakTime
+					state["Current State End Time"] = localtz.localize((now + defaultPresoakTime).time())
 					state["Next State Duration"] = sch["OffTime"] - sch["OnTime"]
 				else:
 					print "Skipping presoak"
 					state["Current State"] = sch["State"]
 					state["Next State"] = "IDLE"
-					state["Current State End Time"] = new + (sch["OffTime"] - sch["OnTime"])
+					state["Current State End Time"] = localtz.localize((now + (sch["OffTime"] - sch["OnTime"])).time())
 					state["Next State Duration"] = time(0,0,0,tzinfo=localtz)
 			else:
 				print "Skipping schedule.  Wrong time of day"
@@ -155,8 +155,14 @@ print "Starting Main.  Current State = "+str(state["Current State"])
 Run = StateMachine.get(state["Current State"]) #, default = ErrorState()) # pass in current state, if state doesn't exist, go to Error state
 Run()
 
-now = datetime.now(localtz)
+now = localtz.localize(datetime.now(localtz).time())
+print now
+print state["Current State End Time"]
 if state["Current State End Time"] < now:
 	print "Moving to next state"
 	state["Current State"] = state["Next State"]
+
+# Update State #
+pickle.dump(state, open(stateMachinePickleFilename, 'wb'))
+pickle.dump(lastPresoak, open(lastPresoakTimeFilename, 'wb'))
 
