@@ -1,5 +1,5 @@
 <?php
-
+require_once("_db.php");
 $on = "0";
 $off = "1";
 
@@ -59,9 +59,23 @@ UpdateStates();
 <html>
 <head>
 <title>Cooler Control</title>
+<link type="text/css" rel="stylesheet" href="media/layout.css" />    
+<!-- helper libraries -->
+<script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
+<!-- daypilot libraries -->
+<script src="js/daypilot/daypilot-all.min.js" type="text/javascript"></script>
 <style>
-
+            .buttons a {
+                text-decoration: none;
+                color: black;
+                display: inline-block;
+                margin-right: 5px;
+            }
+            .selected-button {
+                border-bottom: 2px solid orange;
+            }
 </style>
+
 </head>
 <body>
 <?php
@@ -77,5 +91,17 @@ UpdateStates();
 <input type="submit" name="Toggle" value="Hi"/><?php if($currentState["Hi"] == $on) echo "On"; else echo "Off"; ?><br/>
 <input type="submit" name="Toggle" value="Low"/><?php if($currentState["Low"] == $on) echo "On"; else echo "Off"; ?><br/>
 </form>
+<div id="dpWeek"></div>
+<script type="text/javascript">
+
+  var day = new DayPilot.Calendar("dpWeek");
+  day.viewType = "Week";
+  day.init();
+
+
+  day.events.load("GetAllItems.php");
+
+</script>
+<?php echo GetAllItems(); ?>
 </body>
 </html>

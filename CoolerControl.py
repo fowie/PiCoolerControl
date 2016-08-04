@@ -58,7 +58,7 @@ try:
 except IOError:
 	print "File not found, creating"
 	#Make the file
-	state = {"Current State" : "IDLE", "Next State" : "IDLE", "Current State End Time" : time(0, 0, 0, tzinfo=localtz), "Next State Duration" : time(0, 0, 0, tzinfo=localtz)}
+	state = {"Current State" : "IDLE", "Next State" : "IDLE", "Current State End Time" : datetime.combine(datetime.now().date(), time(0, 0, 0)), "Next State Duration" : datetime.combine(datetime.now().date(), time(0, 0, 0))}
 	pickle.dump(state, open(stateMachinePickleFilename, 'wb'))
 	state = pickle.load(open(stateMachinePickleFilename, 'rb'))
 except:
@@ -71,14 +71,14 @@ try:
 	lastPresoak = pickle.load(open(lastPresoakTimeFilename, 'rb'))
 except IOError:
 	print "File not found, creating and setting presoak time to 1 hour in the past"
-	lastPresoak = datetime.now(localtz) - timedelta(hours=1)
+	lastPresoak = datetime.now() - timedelta(hours=1)
 	pickle.dump(lastPresoak, open(lastPresoakTimeFilename, 'wb'))
 	lastPresoak = pickle.load(open(lastPresoakTimeFilename, 'rb'))
 print "Last Presoak"
 print lastPresoak
 
 for key,value in PINS.items():
-	print("GPIO.setup("+str(value)+", GPIO.OUT)")
+	#print("GPIO.setup("+str(value)+", GPIO.OUT)")
 	GPIO.setup(value, GPIO.OUT)
 
 def GpioSet(pin, newVal):
@@ -92,19 +92,22 @@ def GpioSet(pin, newVal):
 # Sate functions
 def IdleState():
 	print "Idle State"
-	# ITerate through all available schedules and see if we need to change states
+	GpioSet(PINS["Pump"], GPIOoff)
+	GpioSet(PINS["High"], GPIOoff)
+	GpioSet(PINS["Low"], GPIOoff)
+# ITerate through all available schedules and see if we need to change states
 	# get useful variable values
-	now = datetime.now(localtz)
-	print "Current date and time is "+str(now) + " and day of week is "+str(now.date().weekday())
+	now = datetime.now()
+	print "Current date and time is "+str(now) + " and day of week is "+str(now.date().isoweekday())
 	for sch in schedule:
 		print "This schedule starts at "+str(sch["OnTime"])+" on weekday "+str(sch["DayOfWeek"])
-		if int(sch["DayOfWeek"]) == int(now.date().weekday()):  #weekday() returns an int where Monday is 0 and Sunday is 6
+		if int(sch["DayOfWeek"]) == int(now.date().isoweekday()):  #weekday() returns an int where Monday is 0 and Sunday is 6
 			print "Day of week matches"
 			# time objects in MySQL get converted to just TimeDelta objects in python,
 			# now that I know I'm on the right day of the week, make them into full datetimes using
 			# today at 0:0:0 and add the timedeltas
-			OnTime = localtz.localize(datetime.combine(now.date(), time(0,0,0)) + sch["OnTime"])
-			OffTime = localtz.localize(datetime.combine(now.date(), time(0,0,0)) + sch["OffTime"])
+			OnTime = datetime.combine(now.date(), time(0,0,0)) + sch["OnTime"]
+			OffTime = datetime.combine(now.date(), time(0,0,0)) + sch["OffTime"]
 			print OnTime
 			print now
 			if OnTime < now:
@@ -115,14 +118,15 @@ def IdleState():
 					print "Presoaking"
 					state["Current State"] = "PRESOAK"
 					state["Next State"] = sch["State"]
-					state["Current State End Time"] = localtz.localize((now + defaultPresoakTime).time())
+					state["Current State End Time"] = now + defaultPresoakTime
 					state["Next State Duration"] = sch["OffTime"] - sch["OnTime"]
 				else:
 					print "Skipping presoak"
 					state["Current State"] = sch["State"]
 					state["Next State"] = "IDLE"
-					state["Current State End Time"] = localtz.localize((now + (sch["OffTime"] - sch["OnTime"])).time())
-					state["Next State Duration"] = time(0,0,0,tzinfo=localtz)
+					state["Current State End Time"] = now + (sch["OffTime"] - sch["OnTime"])
+					state["Next State Duration"] = time(0,0,0)
+				break
 			else:
 				print "Skipping schedule.  Wrong time of day"
 		else:
@@ -140,7 +144,7 @@ def PresoakState():
 	GpioSet(PINS["Pump"], GPIOon)
 	GpioSet(PINS["High"], GPIOoff)
 	GpioSet(PINS["Low"], GPIOoff)
-	lastPresoak = datetime.now(localtz)
+	lastPresoak = datetime.now()
 	
 def HighState():
 	global PINS, GPIOon, GPIOoff
@@ -169,13 +173,13 @@ print "Starting Main.  Current State = "+str(state["Current State"])
 Run = StateMachine.get(state["Current State"]) #, default = ErrorState()) # pass in current state, if state doesn't exist, go to Error state
 Run()
 
-now = localtz.localize(datetime.now(localtz).time())
+now = datetime.now()
 print now
 print state["Current State End Time"]
 if state["Current State End Time"] < now:
 	print "Moving to next state: "+state["Next State"]
 	state["Current State"] = state["Next State"]
-	state["Current State End Time"] = localtz.localize((datetime.now(localtz) + state["Next State Duration"]).time())
+	state["Current State End Time"] = datetime.now() + state["Next State Duration"]
 	state["Next State"] = "IDLE"
 else:
 	print "Staying in state "+state["Current State"]
