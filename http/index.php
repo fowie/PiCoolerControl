@@ -28,7 +28,7 @@ function GpioSet($pin, $newVal)
 {
 	global $gpiowrite, $on, $off, $pins, $currentState;
 	$command = $gpiowrite." ".$pins[$pin]." ".$newVal;
-	//print("Command: ".$command);
+	print("Command: ".$command);
 	exec($command);
 }
 
@@ -64,6 +64,65 @@ UpdateStates();
 <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
 <!-- daypilot libraries -->
 <script src="js/daypilot/daypilot-all.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+function addEventHandlers(dp) {
+  dp.onEventMoved = function (args) {
+      $.post("backend_move.php", 
+              {
+                  id: args.e.id(),
+                  newStart: args.newStart.toString(),
+                  newEnd: args.newEnd.toString()
+              }, 
+              function() {
+                  console.log("Moved.");
+              });
+  };
+
+  dp.onEventResized = function (args) {
+      $.post("backend_resize.php", 
+              {
+                  id: args.e.id(),
+                  newStart: args.newStart.toString(),
+                  newEnd: args.newEnd.toString()
+              }, 
+              function() {
+                  console.log("Resized.");
+              });
+  };
+
+  // event creating
+  dp.onTimeRangeSelected = function (args) {
+      var name = prompt("Desired fan speed (HIGH or LOW):", "Event");
+      dp.clearSelection();
+      if (!name) return;
+      var e = new DayPilot.Event({
+          start: args.start,
+          end: args.end,
+          id: DayPilot.guid(),
+          resource: args.resource,
+          text: name
+      });
+      dp.events.add(e);
+
+      $.post("backend_create.php", 
+              {
+                  start: args.start.toString(),
+                  end: args.end.toString(),
+                  name: name
+              }, 
+              function() {
+                  console.log("Created.");
+              });
+
+  };
+
+  dp.onEventClick = function(args) {
+      alert("clicked: " + args.e.id());
+  };
+}
+
+</script>
+
 <style>
             .buttons a {
                 text-decoration: none;
@@ -96,10 +155,10 @@ UpdateStates();
 
   var day = new DayPilot.Calendar("dpWeek");
   day.viewType = "Week";
+  day.events.list = <?php echo GetAllItems(); ?>;
+  addEventHandlers(day);
   day.init();
 
-
-  day.events.load("GetAllItems.php");
 
 </script>
 <?php echo GetAllItems(); ?>

@@ -13,12 +13,10 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 function AddItem($dow, $onTime, $offTime, $state)
 {
 	global $db;
-	$insert = "INSERT INTO Schedule (DayOfWeek, OnTime, OffTime, Status) VALUES ('?', '?', '?', '?')";
+	$insert = "INSERT INTO Schedule (DayOfWeek, OnTime, OffTime, State) VALUES ('?', '?', '?', '?')";
 	$stmt = $db->prepare($insert);
 	$stmt->execute(array($dow, $onTime, $offTime, $state));
-	$stmt = $db->prepare("SELECT last_insert_id()");
-	$stmt->execute();
-	return $stmt->fetch()[0];
+	return $db->lastInsertId();
 }
 
 function DeleteItem($id)
