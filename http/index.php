@@ -124,7 +124,6 @@ function addEventHandlers(dp) {
               function(data, status) {
 		if(data.result == "OK")
 		{
-		  alert("Successfully created.");
                   console.log("Created.");
       		  dp.events.add(e);
 		} 
@@ -210,11 +209,11 @@ function addEventHandlers(dp) {
 
 </script>
 <?php //echo GetAllItems(); ?>
-<form action="backend_create.php" method="post">
+<!-- form action="backend_create.php" method="post">
 <input type="hidden" name="start" value="2016-08-05T20:00:01"/>
 <input type="hidden" name="end" value="2016-08-05T21:00:01"/>
 <input type="hidden" name="id" value="4"/>
 <input type="submit"/>
-</form>
+</form-->
 </body>
 </html>
