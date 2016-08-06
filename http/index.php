@@ -1,5 +1,9 @@
 <?php
 require_once("_db.php");
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+
+
 $on = "0";
 $off = "1";
 
@@ -146,7 +150,19 @@ function addEventHandlers(dp) {
 			id: args.e.id()
 		},
 		function(data, status) {
-			dp.events.remove(args.e);
+			if(data.result == "OK")
+			{
+				dp.events.remove(args.e);
+				console.log("Deleted.");
+			}
+			else
+			{
+				console.log("Data:");
+				console.log(data);
+				console.log("Status:");
+				console.log(status);
+				alert("Error deleting event:"+data.message);
+			}
 		});
 	}
   };
@@ -193,7 +209,7 @@ function addEventHandlers(dp) {
 
 
 </script>
-<?php echo //GetAllItems(); ?>
+<?php //echo GetAllItems(); ?>
 <form action="backend_create.php" method="post">
 <input type="hidden" name="start" value="2016-08-05T20:00:01"/>
 <input type="hidden" name="end" value="2016-08-05T21:00:01"/>
