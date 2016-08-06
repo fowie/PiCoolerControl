@@ -37,6 +37,7 @@ PINS = {"Pump" : 2, "High" : 3, "Low" : 4};
 
 MySql = MySQL.MySql()
 schedule = MySql.GetSchedules()
+print "STARTING.  DATE: "+str(datetime.now())
 print "Schedules:"
 for sch in schedule:
 	print sch

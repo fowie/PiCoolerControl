@@ -24,7 +24,17 @@ if(isset($_GET['Toggle']))
 	}
 	else
 	{
-		GpioSet($_GET['Toggle'], $on);
+		//don't let hi and low go on at the same time
+		if($_GET['Toggle'] == "Hi")
+		{
+			GpioSet("Low", $off);
+			GpioSet($_GET['Toggle'], $on);
+		}
+		else if($_GET['Toggle'] == "Low")
+		{
+			GpioSet("Hi", $off);
+			GpioSet($_GET['Toggle'], $on);
+		}
 	}
 }
 
@@ -191,12 +201,12 @@ function addEventHandlers(dp) {
 //provide buttons for changing each relay
 
 ?>
-<!-- 
+ 
 <form name="change" method="get">
 <input type="submit" name="Toggle" value="Pump"/> <?php if($currentState["Pump"] == $on) echo "On"; else echo "Off"; ?><br/>
 <input type="submit" name="Toggle" value="Hi"/><?php if($currentState["Hi"] == $on) echo "On"; else echo "Off"; ?><br/>
 <input type="submit" name="Toggle" value="Low"/><?php if($currentState["Low"] == $on) echo "On"; else echo "Off"; ?><br/>
-</form> -->
+</form> 
 <div id="dpWeek"></div>
 <script type="text/javascript">
 
