@@ -1,5 +1,6 @@
 <?php
 require_once '_db.php';
+class Result {}
 
 $insert = "INSERT INTO Schedule (DayOfWeek, OnTime, OffTime, State) VALUES (:dayofweek, :ontime, :offtime, :state)";
 
@@ -17,13 +18,22 @@ $stmt->bindParam(':ontime', $startTime);
 $stmt->bindParam(':offtime', $endTime);
 $stmt->bindParam(':state', $_POST['name']);
 
-$stmt->execute();
-
-class Result {}
 
 $response = new Result();
-$response->result = 'OK';
-$response->message = 'Created with id: '.$db->lastInsertId();
+
+
+try
+{
+	$stmt->execute();
+	$response->result = 'OK';
+	$response->message = 'Created with id: '.$db->lastInsertId();
+}
+catch (PDOException $e)
+{
+	$response->result = 'ERROR';
+	$response->message = $e->getMessage();	
+}
+
 
 header('Content-Type: application/json');
 echo json_encode($response);

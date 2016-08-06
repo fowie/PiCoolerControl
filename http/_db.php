@@ -10,23 +10,6 @@ class Event {}
 $db = new PDO('mysql:host=fowie.com;dbname=CoxHome', 'CoxHome', '1590N1500W');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
 
-function AddItem($dow, $onTime, $offTime, $state)
-{
-	global $db;
-	$insert = "INSERT INTO Schedule (DayOfWeek, OnTime, OffTime, State) VALUES ('?', '?', '?', '?')";
-	$stmt = $db->prepare($insert);
-	$stmt->execute(array($dow, $onTime, $offTime, $state));
-	return $db->lastInsertId();
-}
-
-function DeleteItem($id)
-{
-	global $db;
-	$query = "DELETE FROM Schedule WHERE ID = ?";
-	$stmt = $db->prepare($query);
-	$stmt->execute(array($id));	
-}
-
 function GetAllItems()
 {
 	global $db;

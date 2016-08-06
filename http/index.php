@@ -73,8 +73,16 @@ function addEventHandlers(dp) {
                   newStart: args.newStart.toString(),
                   newEnd: args.newEnd.toString()
               }, 
-              function() {
-                  console.log("Moved.");
+              function(data, status) {
+ 		if(data.result == "OK")
+		{
+             	  console.log("Moved.");
+		}
+		else
+		{
+		  console.log(data);
+		  console.log(status);
+		}
               });
   };
 
@@ -92,7 +100,7 @@ function addEventHandlers(dp) {
 
   // event creating
   dp.onTimeRangeSelected = function (args) {
-      var name = prompt("Desired fan speed (HIGH or LOW):", "Event");
+      var name = prompt("Desired fan speed (HIGH or LOW):", "HIGH");
       dp.clearSelection();
       if (!name) return;
       var e = new DayPilot.Event({
@@ -102,7 +110,6 @@ function addEventHandlers(dp) {
           resource: args.resource,
           text: name
       });
-      dp.events.add(e);
 
       $.post("backend_create.php", 
               {
@@ -110,14 +117,38 @@ function addEventHandlers(dp) {
                   end: args.end.toString(),
                   name: name
               }, 
-              function() {
+              function(data, status) {
+		if(data.result == "OK")
+		{
+		  alert("Successfully created.");
                   console.log("Created.");
+      		  dp.events.add(e);
+		} 
+		else
+		{
+		  console.log("Data:");
+		  console.log(data);
+		  console.log("Status:");
+		  console.log(status);
+		  alert("Error creating event:"+data.message);
+		  status = "error";
+		}
               });
 
   };
 
   dp.onEventClick = function(args) {
-      alert("clicked: " + args.e.id());
+      var r = confirm("Are you sure you want to delete this item?");
+	if( r == true )
+	{
+		$.post("backend_delete.php",
+		{
+			id: args.e.id()
+		},
+		function(data, status) {
+			dp.events.remove(args.e);
+		});
+	}
   };
 }
 
@@ -145,11 +176,12 @@ function addEventHandlers(dp) {
 //provide buttons for changing each relay
 
 ?>
+<!-- 
 <form name="change" method="get">
 <input type="submit" name="Toggle" value="Pump"/> <?php if($currentState["Pump"] == $on) echo "On"; else echo "Off"; ?><br/>
 <input type="submit" name="Toggle" value="Hi"/><?php if($currentState["Hi"] == $on) echo "On"; else echo "Off"; ?><br/>
 <input type="submit" name="Toggle" value="Low"/><?php if($currentState["Low"] == $on) echo "On"; else echo "Off"; ?><br/>
-</form>
+</form> -->
 <div id="dpWeek"></div>
 <script type="text/javascript">
 
@@ -161,6 +193,12 @@ function addEventHandlers(dp) {
 
 
 </script>
-<?php echo GetAllItems(); ?>
+<?php echo //GetAllItems(); ?>
+<form action="backend_create.php" method="post">
+<input type="hidden" name="start" value="2016-08-05T20:00:01"/>
+<input type="hidden" name="end" value="2016-08-05T21:00:01"/>
+<input type="hidden" name="id" value="4"/>
+<input type="submit"/>
+</form>
 </body>
 </html>
