@@ -22,7 +22,7 @@ function GetAllItems()
 	foreach($items as $row) {
 	// figure out what the date would be given today and the supplied day of week
 	// step 1, get today's date
-	$dayOfWeek = date("N"); //1-7 Mon-Sun
+	$dayOfWeek = date("w"); //0-6 Sun-Sat
 	$itemDayOfWeek = $row['DayOfWeek'];
 	if($itemDayOfWeek < $dayOfWeek)
 		$itemDate = date("Y-m-d", strtotime("-".($dayOfWeek - $itemDayOfWeek)." days"));
@@ -41,5 +41,14 @@ function GetAllItems()
 	return json_encode($events);
 }
 
-
+function GetState()
+{
+	global $db;
+	$query = "SELECT * FROM Cooler_State LIMIT 1";
+	$stmt = $db->prepare($query);
+	$stmt->execute();
+	$dbstate = $stmt->fetch(PDO::FETCH_ASSOC);
+	$state = array("Current State End Time"=>$dbstate['CS_End_Time'], "Current State"=>$dbstate['CS'], "Next State"=>$dbstate['NS'], "Next State Duration"=>$dbstate['NS_Duration']);
+	return $state;
+}
 ?>

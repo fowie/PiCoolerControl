@@ -151,7 +151,7 @@ function addEventHandlers(dp) {
   };
 
   dp.onEventClick = function(args) {
-      var r = confirm("Are you sure you want to delete this item?");
+      var r = confirm("Are you sure you want to delete this item ("+args.e.id()+")?");
 	if( r == true )
 	{
 		$.post("backend_delete.php",
@@ -193,6 +193,7 @@ function addEventHandlers(dp) {
 
 </head>
 <body>
+<center><h3>The current time and date is: <?=date("Y-m-d H:i:s");?></h3></center>
 <?php
 //connect to DB
 
@@ -202,11 +203,6 @@ function addEventHandlers(dp) {
 
 ?>
  
-<form name="change" method="get">
-<input type="submit" name="Toggle" value="Pump"/> <?php if($currentState["Pump"] == $on) echo "On"; else echo "Off"; ?><br/>
-<input type="submit" name="Toggle" value="Hi"/><?php if($currentState["Hi"] == $on) echo "On"; else echo "Off"; ?><br/>
-<input type="submit" name="Toggle" value="Low"/><?php if($currentState["Low"] == $on) echo "On"; else echo "Off"; ?><br/>
-</form> 
 <div id="dpWeek"></div>
 <script type="text/javascript">
 
@@ -218,6 +214,33 @@ function addEventHandlers(dp) {
 
 
 </script>
+<h3>Manual Control</h3>
+<h4>Note: Changes made here will still be overwritten by any scheduled operations in the calendar above</h4>
+<form name="change" method="get">
+<input type="submit" name="Toggle" value="Pump"/>Status: <?php if($currentState["Pump"] == $on) echo "On"; else echo "Off"; ?><br/>
+<input type="submit" name="Toggle" value="Hi"/>Status: <?php if($currentState["Hi"] == $on) echo "On"; else echo "Off"; ?><br/>
+<input type="submit" name="Toggle" value="Low"/>Status: <?php if($currentState["Low"] == $on) echo "On"; else echo "Off"; ?><br/>
+</form> 
+<?php $state = GetState(); 
+//print($state['Current State End Time']."<br/>");
+//print($state['Next State Duration']."<br/>");
+//print($state['Current State End Time']." + ".$state['Next State Duration']);
+$date = date_parse_from_format("H:i:s", $state['Next State Duration']);
+//print_r($date);
+$nsendtime = strtotime($state['Current State End Time']." + ".$date['hour']." hours ".$date['minute']." minutes ".$date['second']." seconds");
+if($state['Next State'] != "IDLE")
+{
+?>
+<h4>Program is currently in <?=$state['Current State'];?> mode.  It will move to <?=$state['Next State'];?> mode at <?=$state['Current State End Time'];?>.  Mode <?=$state['Next State'];?> will then run until <?=date("H:i:s", $nsendtime);?></h4>
+<?php
+}
+else
+{
+?>
+<h4>Program is currently in <?=$state['Current State'];?> mode.  It will move to <?=$state['Next State'];?> mode at <?=$state['Current State End Time'];?>.  It will remain there until the next scheduled program..</h4>
+<?php 
+}
+?>
 <?php //echo GetAllItems(); ?>
 <!-- form action="backend_create.php" method="post">
 <input type="hidden" name="start" value="2016-08-05T20:00:01"/>

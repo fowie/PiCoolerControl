@@ -53,17 +53,19 @@ for sch in schedule:
 #except:
 #	print("Error:", sys.exc_info()[0])
 
-try:
-	print "Unpickling state machine pickle"
-	state = pickle.load(open(stateMachinePickleFilename, 'rb'))
-except IOError:
-	print "File not found, creating"
-	#Make the file
-	state = {"Current State" : "IDLE", "Next State" : "IDLE", "Current State End Time" : datetime.combine(datetime.now().date(), time(0, 0, 0)), "Next State Duration" : datetime.combine(datetime.now().date(), time(0, 0, 0))}
-	pickle.dump(state, open(stateMachinePickleFilename, 'wb'))
-	state = pickle.load(open(stateMachinePickleFilename, 'rb'))
-except:
-	print("Error:", sys.exc_info()[0])
+state = MySql.GetState()
+
+#try:
+#	print "Unpickling state machine pickle"
+#	state = pickle.load(open(stateMachinePickleFilename, 'rb'))
+#except IOError:
+#	print "File not found, creating"
+#	#Make the file
+#	state = {"Current State" : "IDLE", "Next State" : "IDLE", "Current State End Time" : datetime.combine(datetime.now().date(), time(0, 0, 0)), "Next State Duration" : datetime.combine(datetime.now().date(), time(0, 0, 0))}
+#	pickle.dump(state, open(stateMachinePickleFilename, 'wb'))
+#	state = pickle.load(open(stateMachinePickleFilename, 'rb'))
+#except:
+#	print("Error:", sys.exc_info()[0])
 print "State:"
 print state
 
@@ -99,10 +101,10 @@ def IdleState():
 # ITerate through all available schedules and see if we need to change states
 	# get useful variable values
 	now = datetime.now()
-	print "Current date and time is "+str(now) + " and day of week is "+str(now.date().isoweekday())
+	print "Current date and time is "+str(now) + " and day of week is "+str(now.date().weekday())
 	for sch in schedule:
 		print "This schedule starts at "+str(sch["OnTime"])+" on weekday "+str(sch["DayOfWeek"])
-		if int(sch["DayOfWeek"]) == int(now.date().isoweekday()):  #weekday() returns an int where Monday is 0 and Sunday is 6
+		if int(sch["DayOfWeek"]) == int(now.date().weekday()):  #weekday() returns an int where Monday is 0 and Sunday is 6
 			print "Day of week matches"
 			# time objects in MySQL get converted to just TimeDelta objects in python,
 			# now that I know I'm on the right day of the week, make them into full datetimes using
@@ -187,6 +189,7 @@ else:
 	print "Next state change is at "+str(state["Current State End Time"])
 
 # Update State #
-pickle.dump(state, open(stateMachinePickleFilename, 'wb'))
+#pickle.dump(state, open(stateMachinePickleFilename, 'wb'))
+MySql.SaveState(state)
 pickle.dump(lastPresoak, open(lastPresoakTimeFilename, 'wb'))
 
