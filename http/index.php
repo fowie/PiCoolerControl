@@ -202,7 +202,18 @@ function addEventHandlers(dp) {
 //provide buttons for changing each relay
 
 ?>
- 
+<table width="100%" style="font-weight: bold; font-size: 125%;">
+	<tr width="100%">
+		<td width="2%">&nbsp;</td>
+		<td width="12%">Sunday</td>
+		<td width="12%">Monday</td>
+		<td width="12%">Tuesday</td>
+		<td width="12%">Wednesday</td>
+		<td width="12%">Thursday</td>
+		<td width="12%">Friday</td>
+		<td width="12%">Saturday</td>
+	</tr>
+</table>
 <div id="dpWeek"></div>
 <script type="text/javascript">
 
