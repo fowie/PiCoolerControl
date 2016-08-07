@@ -113,7 +113,7 @@ def IdleState():
 			OffTime = datetime.combine(now.date(), time(0,0,0)) + sch["OffTime"]
 			print OnTime
 			print now
-			if OnTime < now:
+			if OnTime < now and OffTime > now:
 				print "Starting schedule"
 				lastPresoakTime = now - lastPresoak
 				print "Last presoak was "+str(lastPresoakTime)+" ago"
