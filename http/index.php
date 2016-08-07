@@ -190,7 +190,7 @@ function addEventHandlers(dp) {
                 border-bottom: 2px solid orange;
             }
 </style>
-
+<meta http-equiv="refresh" content="300"/>
 </head>
 <body>
 <center><h3>The current time and date is: <?=date("Y-m-d H:i:s");?></h3></center>
