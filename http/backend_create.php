@@ -11,7 +11,7 @@ $start = date("Y-m-d", strtotime($_POST['start']));
 $end = date("Y-m-d", strtotime($_POST['end']));
 $startTime = date("H:i:s", strtotime($_POST['start']));
 $endTime = date("H:i:s", strtotime($_POST['end']));
-$dayofweek = date("w", strtotime($_POST['start']));
+$dayofweek = date("N", strtotime($_POST['start']));
 
 $stmt->bindParam(':dayofweek', $dayofweek);
 $stmt->bindParam(':ontime', $startTime);

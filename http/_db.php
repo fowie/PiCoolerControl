@@ -22,14 +22,27 @@ function GetAllItems()
 	foreach($items as $row) {
 	// figure out what the date would be given today and the supplied day of week
 	// step 1, get today's date
-	$dayOfWeek = date("w"); //0-6 Sun-Sat
+	$dayOfWeek = date("N"); //1-7 Mon-Sun
+	//print("Day of week: ".$dayOfWeek."\n");
 	$itemDayOfWeek = $row['DayOfWeek'];
-	if($itemDayOfWeek < $dayOfWeek)
+	//print("Item day ofw eek: ".$itemDayOfWeek."\n");
+	if($itemDayOfWeek < $dayOfWeek && $dayOfWeek < 7)
+	{
 		$itemDate = date("Y-m-d", strtotime("-".($dayOfWeek - $itemDayOfWeek)." days"));
+	}
 	else if($itemDayOfWeek > $dayOfWeek)
+	{
 		$itemDate = date("Y-m-d", strtotime("+".($itemDayOfWeek - $dayOfWeek)." days"));
+	}
+	else if($itemDayOfWeek != 7 && $dayOfWeek == 7)
+	{
+		$itemDate = date("Y-m-d", strtotime("+".$itemDayOfWeek." days"));
+	}
 	else
+	{
 		$itemDate = date("Y-m-d");
+	}
+	//print("Date: ".$itemDate."\n");
 
 	  $e = new Event();
 	  $e->id = $row['ID'];

@@ -101,10 +101,10 @@ def IdleState():
 # ITerate through all available schedules and see if we need to change states
 	# get useful variable values
 	now = datetime.now()
-	print "Current date and time is "+str(now) + " and day of week is "+str(now.date().weekday())
+	print "Current date and time is "+str(now) + " and day of week is "+str(now.date().isoweekday())
 	for sch in schedule:
 		print "This schedule starts at "+str(sch["OnTime"])+" on weekday "+str(sch["DayOfWeek"])
-		if int(sch["DayOfWeek"]) == int(now.date().weekday()):  #weekday() returns an int where Monday is 0 and Sunday is 6
+		if int(sch["DayOfWeek"]) == int(now.date().isoweekday()):  #weekday() returns an int where Monday is 0 and Sunday is 6
 			print "Day of week matches"
 			# time objects in MySQL get converted to just TimeDelta objects in python,
 			# now that I know I'm on the right day of the week, make them into full datetimes using
