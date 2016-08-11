@@ -23,25 +23,36 @@ function GetAllItems()
 	// figure out what the date would be given today and the supplied day of week
 	// step 1, get today's date
 	$dayOfWeek = date("N"); //1-7 Mon-Sun
-	//print("Day of week: ".$dayOfWeek."\n");
+	#print("Day of week: ".$dayOfWeek."\n");
 	$itemDayOfWeek = $row['DayOfWeek'];
-	//print("Item day ofw eek: ".$itemDayOfWeek."\n");
-	if($itemDayOfWeek < $dayOfWeek && $dayOfWeek < 7)
-	{
-		$itemDate = date("Y-m-d", strtotime("-".($dayOfWeek - $itemDayOfWeek)." days"));
-	}
-	else if($itemDayOfWeek > $dayOfWeek)
-	{
-		$itemDate = date("Y-m-d", strtotime("+".($itemDayOfWeek - $dayOfWeek)." days"));
-	}
-	else if($itemDayOfWeek != 7 && $dayOfWeek == 7)
-	{
-		$itemDate = date("Y-m-d", strtotime("+".$itemDayOfWeek." days"));
-	}
-	else
-	{
+	#print("Item day of week: ".$itemDayOfWeek."\n");
+	if($itemDayOfWeek == $dayOfWeek)
 		$itemDate = date("Y-m-d");
-	}
+	else if ($dayOfWeek == 7)
+		$itemDate = date("Y-m-d", strtotime("+ ".$itemDayOfWeek." days"));
+	else if ($itemDayOfWeek == 7)
+		$itemDate = date("Y-m-d", strtotime("- ".$dayOfWeek." days"));
+	else if ($dayOfWeek > $itemDayOfWeek)
+		$itemDate = date("Y-m-d", strtotime("- ".($dayOfWeek - $itemDayOfWeek)." days"));
+	else if ($itemDayOfWeek > $dayOfWeek)
+		$itemDate = date("Y-m-d", strtotime("+ ".($itemDayOfWeek - $dayOfWeek)." days"));
+
+	#if($itemDayOfWeek < $dayOfWeek && $dayOfWeek < 7)
+	#{
+	#	$itemDate = date("Y-m-d", strtotime("-".($dayOfWeek - $itemDayOfWeek)." days"));
+	#}
+	#else if($itemDayOfWeek > $dayOfWeek)
+	#{
+	#	$itemDate = date("Y-m-d", strtotime("+".($itemDayOfWeek - $dayOfWeek)." days"));
+	#}
+	#else if($itemDayOfWeek != 7 && $dayOfWeek == 7)
+	#{
+	#	$itemDate = date("Y-m-d", strtotime("+".$itemDayOfWeek." days"));
+	#}
+	#else // item day of week == current day of week
+	#{
+	#	$itemDate = date("Y-m-d");
+	#}
 	//print("Date: ".$itemDate."\n");
 
 	  $e = new Event();

@@ -252,7 +252,7 @@ else
 <?php 
 }
 ?>
-<?php //echo GetAllItems(); ?>
+<?php echo GetAllItems(); ?>
 <!-- form action="backend_create.php" method="post">
 <input type="hidden" name="start" value="2016-08-05T20:00:01"/>
 <input type="hidden" name="end" value="2016-08-05T21:00:01"/>
